@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<title>Rezultatet</title>
+<style>
+body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,#e0f7fa,#fce4ec);display:flex;justify-content:center;padding:40px 20px;}
+.container{width:800px;background:white;border-radius:15px;box-shadow:0 8px 20px rgba(0,0,0,0.15);padding:30px;text-align:center;}
+h2{font-size:26px;margin-bottom:25px;color:#333;}
+.section{margin-bottom:30px;animation:fadeIn 0.8s ease-in-out;}
+.section h3{background:#6200ea;color:white;padding:10px 15px;border-radius:8px;margin-bottom:15px;font-size:20px;}
+.totals{font-size:18px;color:#333;font-weight:bold;opacity:0;transform:scale(0.95);animation:fadeInScale 0.8s forwards;}
+.totals .original{display:block;color:green;font-size:16px;margin-top:5px;}
+.back-btn{display:inline-block;margin-top:15px;padding:10px 20px;background:#007bff;color:white;text-decoration:none;border-radius:5px;transition:0.3s;}
+.back-btn:hover{background:#0056b3;transform:scale(1.05);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);}}
+@keyframes fadeInScale{to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Rezultatet e Skeleve</h2>
+
+<div class="section">
+<h3>Skele e vogël</h3>
+<div class="totals" id="small-results"></div>
+</div>
+
+<div class="section">
+<h3>Skele e madhe</h3>
+<div class="totals" id="medium-results"></div>
+</div>
+
+<div class="section">
+<h3>Skele e trashë</h3>
+<div class="totals" id="large-results"></div>
+</div>
+
+<div class="totals" id="grand-results"></div>
+
+<a href="index.html" class="back-btn">⬅ Kthehu mbrapa</a>
+</div>
+
+<script>
+function renderResults(){
+    let allSaved = JSON.parse(localStorage.getItem("allSavedTables")) || [];
+    let grandTotals={small:0, medium:0, large:0};
+
+    allSaved.forEach(tableSet=>{
+        ["small","medium","large"].forEach(key=>{
+            if(tableSet[key]){
+                tableSet[key].forEach(v=>{
+                    if(v!=="" && !isNaN(v)) grandTotals[key]+=parseFloat(v);
+                });
+            }
+        });
+    });
+
+    document.getElementById("small-results").innerHTML=
+        `<span>Totali për pages ×1.75: ${(grandTotals.small*1.75).toFixed(2)}€</span>
+         <span class="original">Shuma e skeleve: ${grandTotals.small.toFixed(2)}</span>`;
+
+    document.getElementById("medium-results").innerHTML=
+        `<span>Totali për pages ×1.75: ${(grandTotals.medium*1.75).toFixed(2)}€</span>
+         <span class="original">Shuma e skeleve: ${grandTotals.medium.toFixed(2)}</span>`;
+
+    document.getElementById("large-results").innerHTML=
+        `<span>Totali për pages ×1.75: ${(grandTotals.large*1.75).toFixed(2)}€</span>
+         <span class="original">Shuma e skeleve: ${grandTotals.large.toFixed(2)}</span>`;
+
+    const totalGrand = grandTotals.small + grandTotals.medium + grandTotals.large;
+    document.getElementById("grand-results").innerHTML=
+        `<span>Totali i përgjithshëm ×1.75: ${(totalGrand*1.75).toFixed(2)}€</span>
+         <span class="original">Totali i të gjitha skeleve: ${totalGrand.toFixed(2)}</span>`;
+}
+
+renderResults();
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<title>Tabela 14 Ditore</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background: linear-gradient(135deg,#e0f7fa,#fce4ec);display:flex;justify-content:center;padding:40px 20px;}
+.container{width:900px;background:white;border-radius:15px;box-shadow:0 8px 20px rgba(0,0,0,0.15);padding:30px;}
+h2{text-align:center;color:#333;margin-bottom:25px;font-size:26px;}
+.section{margin-bottom:40px;animation:fadeIn 0.8s ease-in-out;}
+.section h3{background:#6200ea;color:white;padding:10px 15px;border-radius:8px;margin-bottom:15px;font-size:20px;}
+table{border-collapse:collapse;width:100%;margin-bottom:15px;}
+th,td{padding:12px;border-radius:8px;text-align:center;transition: background 0.3s;}
+th{background:#6200ea;color:white;}
+td{background:#f4f4f9;}
+td input{width:90px;padding:6px;border-radius:6px;border:1px solid #ccc;text-align:right;transition:0.3s;}
+td input:focus{border-color:#6200ea;box-shadow:0 0 5px rgba(98,0,234,0.5);outline:none;}
+.totals{font-weight:bold;font-size:16px;color:#333;opacity:0;transform:scale(0.95);animation:fadeInScale 0.8s forwards;}
+.totals .original{color:green;font-size:15px;margin-top:3px;display:block;}
+.buttons{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;}
+button{padding:10px 18px;border:none;cursor:pointer;border-radius:8px;font-size:15px;font-weight:bold;transition:0.3s;}
+.save-btn{background:#28a745;color:white;}
+.save-btn:hover{background:#218838;transform:scale(1.05);}
+.view-btn{background:#6f42c1;color:white;}
+.view-btn:hover{background:#563d7c;transform:scale(1.05);}
+.clear-btn{background:#dc3545;color:white;}
+.clear-btn:hover{background:#c82333;transform:scale(1.05);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);}}
+@keyframes fadeInScale{to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Tabela e Skeleve 14 Ditore</h2>
+
+<div class="section" id="small-section">
+<h3>Skele e vogël</h3>
+<table id="small-table"></table>
+<div class="totals" id="small-totals"></div>
+</div>
+
+<div class="section" id="medium-section">
+<h3>Skele e madhe</h3>
+<table id="medium-table"></table>
+<div class="totals" id="medium-totals"></div>
+</div>
+
+<div class="section" id="large-section">
+<h3>Skele e trashë</h3>
+<table id="large-table"></table>
+<div class="totals" id="large-totals"></div>
+</div>
+
+<div class="section" id="grand-section">
+<h3>Totali i përgjithshëm</h3>
+<div class="totals" id="grand-totals"></div>
+</div>
+
+<div class="buttons">
+<button class="save-btn" onclick="saveAllTables()">💾 Ruaj të gjitha</button>
+<button class="view-btn" onclick="window.location.href='rezultatet.html'">📊 Shiko të gjitha</button>
+<button class="clear-btn" onclick="clearAllTables()">🧹 Pastro të gjitha</button>
+</div>
+</div>
+
+<script>
+const ditetJaves=["E Hënë","E Martë","E Mërkurë","E Enjte","E Premte","E Shtunë","E Diel"];
+let tables={
+    small: JSON.parse(localStorage.getItem("smallTable"))||Array(14).fill(""),
+    medium: JSON.parse(localStorage.getItem("mediumTable"))||Array(14).fill(""),
+    large: JSON.parse(localStorage.getItem("largeTable"))||Array(14).fill("")
+};
+
+function renderTable(tableId,data,totalsId){
+    let tableEl=document.getElementById(tableId);
+    let totalsEl=document.getElementById(totalsId);
+    let html=`<tr><th>Dita</th><th>Numri i skeleve</th></tr>`;
+    for(let i=0;i<14;i++){
+        let value = data[i] || "";
+        html+=`<tr>
+            <td>${ditetJaves[i%7]} ${i<7?"(Java 1)":"(Java 2)"}</td>
+            <td><input type="number" value="${value}" onchange="updateValue('${tableId}',${i},this.value)"></td>
+        </tr>`;
+    }
+    tableEl.innerHTML = html;
+    calculateTotals(data,totalsEl);
+    calculateGrandTotal();
+}
+
+function updateValue(tableId,index,value){
+    let key=tableId.replace("-table","");
+    tables[key][index]=value?parseFloat(value):"";
+    localStorage.setItem(key+"Table",JSON.stringify(tables[key]));
+    calculateTotals(tables[key],document.getElementById(key+"-totals"));
+    calculateGrandTotal();
+}
+
+// Totali i tabelave aktive shfaq vetëm të dhënat e momentit
+function calculateTotals(data,totalsEl){
+    let sum = 0;
+    data.forEach(v=>{if(v!=="" && !isNaN(v)) sum+=parseFloat(v);});
+    totalsEl.innerHTML = `<span>Qmimorja ×1.75 per pages ${(sum*1.75).toFixed(2)}€</span>
+                          <span class="original">Shuma e skeleve: ${sum.toFixed(2)}</span>`;
+}
+
+function calculateGrandTotal(){
+    let grandSum=0;
+    for(let key in tables){
+        tables[key].forEach(v=>{if(v!=="" && !isNaN(v)) grandSum+=parseFloat(v);});
+    }
+    document.getElementById("grand-totals").innerHTML=
+    `<span>Qmimorja ×1.75 për pages ${(grandSum*1.75).toFixed(2)}€</span>
+     <span class="original">Shuma e përgjithshme e skeleve: ${grandSum.toFixed(2)}</span>`;
+}
+
+function saveAllTables(){
+    let savedPermanentTables = JSON.parse(localStorage.getItem("savedPermanentTables")) || {};
+    for(let key in tables){
+        tables[key].forEach((v,i)=>{
+            if(v!=="" && !isNaN(v)){
+                if(!savedPermanentTables[key]) savedPermanentTables[key]=[];
+                savedPermanentTables[key][i]=parseFloat(v);
+            }
+        });
+    }
+    localStorage.setItem("savedPermanentTables", JSON.stringify(savedPermanentTables));
+
+    // Ruaj çdo tabelë të re në array për të ruajtur sa tabela të duash
+    let allSaved = JSON.parse(localStorage.getItem("allSavedTables")) || [];
+    allSaved.push(JSON.parse(JSON.stringify(savedPermanentTables)));
+    localStorage.setItem("allSavedTables", JSON.stringify(allSaved));
+
+    alert("Të gjitha tabelat u ruajtën përherë!");
+}
+
+function clearAllTables(){
+    if(confirm("A je i sigurt që do të pastrosh të gjitha të dhënat e tabelave?")){
+        for(let key in tables){
+            tables[key]=Array(14).fill("");
+            localStorage.setItem(key+"Table",JSON.stringify(tables[key]));
+        }
+        renderTable("small-table",tables.small,"small-totals");
+        renderTable("medium-table",tables.medium,"medium-totals");
+        renderTable("large-table",tables.large,"large-totals");
+        calculateGrandTotal();
+    }
+}
+
+renderTable("small-table",tables.small,"small-totals");
+renderTable("medium-table",tables.medium,"medium-totals");
+renderTable("large-table",tables.large,"large-totals");
+</script>
+</body>
+</html>
